@@ -14,13 +14,25 @@
 - fast subdivisions (1/30th of a second) but grouped rhythms
 - Ornaments
 - my neume piece?
-
+- put parameters on screen for easy access/remembering and to spark GUI ideas
 
 CLASS IDEAS
 - stopwatch
 - Tempo
   - accelerate
   - double / other ratios
+
+
+PARAMETERS TO PLAY WITH
+- pitch
+- tempo
+  - extremes in range
+  - fixed tempos
+- X
+
+
+METHODS
+- almostOctave() returns boolean
 */
 
 // TODO: alternate between Perlin doublingRatio and perfect octave doubling
@@ -28,10 +40,20 @@ CLASS IDEAS
 // TODO: try accelerating parameter such as speed
 // TODO: accelerate towards the octave!
 
+/*
+
+
+
+GLOBAL VARIABLES
+
+
+
+*/
+
 let canvas;
 let bassFreq = 0;
 let x = 0;
-let period = 30; // measured in frames
+let period = 2; // measured in frames
 let bass, osc2;
 let recorder;
 let soundFile;
@@ -61,6 +83,7 @@ function setup() {
   bass.start();
   
   osc2 = new p5.Oscillator(0.000001, "sawtooth");
+  osc2.amp(0.3);
   osc2.start();
 
   recorder = new p5.SoundRecorder();
@@ -75,19 +98,32 @@ function draw() {
   }
 
   // Accelerate inverse of period
-  period = applyConstantAccelerationToInverse(period, -(1 / getTargetFrameRate()) / 120);
+  period = applyConstantAccelerationToInverse(period, (1 / getTargetFrameRate()) / 60);
   // print("i: ", i, "period: ", round(period), period);
-  if (i == round(period) || i == round(period) + 1) {    
+  if (i == round(period) || i == round(period) + 1) {
     // Randomize pitch
-    bassFreq = roundToNearestMultiple(random(40, 140), 1);
-    bass.freq(bassFreq);
+    bassFreq = roundToNearestMultiple(random(50, 150), 4);
+    if (random() > 0.05) {
+      bass.amp(1);
+      bass.freq(bassFreq);
+    } else {
+      if (random() > 1) {
+        bass.amp(0);
+      }
+    }
     
-    // Perlin doubling ratio
-    let doublingRatio = map(noise(x), 0, 1, 1, 4);
-    let freq2 = double(bass, bassFreq, doublingRatio, osc2);
-    // print("bassFreq: ", bassFreq, "\t\t  freq2: ", freq2);
+    if (random() > 0.1) {
+      osc2.amp(0.3);
+      let doublingRatio = map(noise(x), 0, 1, 1, 4);
+      let freq2 = double(bass, bassFreq, doublingRatio, osc2);
+      // print("bassFreq: ", bassFreq, "\t\t  freq2: ", freq2);
+    } else {
+      if (random() > 0.2) {
+        osc2.amp(0);
+      }
+    }
     
-    x += 0.01;
+    x += 0.005;
     i = 0;
   } else {
     i += 1;
@@ -104,32 +140,12 @@ HELPER FUNCTIONS
 
 */
 
-function startRecording() {
-    // Start AudioContext
-    userStartAudio();
-  
-    if (state === 0) {
-      // Record to p5.SoundFile
-      recorder.record(soundFile);
-      hasRecordingStarted = true;
-      state++;
-    }
-    else if (state === 1) {
-      // Stop recording
-      recorder.stop();
-      state++;
-    }
-    else if (state === 2) {
-      // Save recording
-      save(soundFile, 'sounds.wav');
-      state++;
-    }
-    else if (state === 3) {
-      // Stop oscillators
-      bass.stop();
-      osc2.stop();
-    }
-}
+// HELPER FUNCTIONS GO HERE
+//
+//
+//
+//
+//
 
 /*
 
@@ -156,4 +172,41 @@ function double(osc, freq, r, osc2) {
 function applyConstantAccelerationToInverse(inverseVariable, r) {
   let delta = period - (1 / ((1 / period) + r));
   return inverseVariable + delta;
+}
+
+/*
+
+
+
+RECORDING FUNCTIONS
+
+
+
+*/
+
+function startRecording() {
+  // Start AudioContext
+  userStartAudio();
+
+  if (state === 0) {
+    // Record to p5.SoundFile
+    recorder.record(soundFile);
+    hasRecordingStarted = true;
+    state++;
+  }
+  else if (state === 1) {
+    // Stop recording
+    recorder.stop();
+    state++;
+  }
+  else if (state === 2) {
+    // Save recording
+    save(soundFile, 'sounds.wav');
+    state++;
+  }
+  else if (state === 3) {
+    // Stop oscillators
+    bass.stop();
+    osc2.stop();
+  }
 }
