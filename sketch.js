@@ -26,30 +26,41 @@ CLASS IDEAS
 // TODO: try accelerating parameter such as speed
 // TODO: accelerate towards the octave!
 
-
+let canvas;
 let bassFreq = 0;
 let x = 0;
 let period = 30; // measured in frames
 let bass, osc2;
-
+let recorder;
+let soundFile;
 let i = 0;
+let state = 0;
+let hasRecordingStarted = false;
 
 function setup() {
   getAudioContext().suspend();
-  createCanvas(1000, 500);
+  canvas = createCanvas(1000, 500);
   frameRate(60);
+  canvas.mousePressed(startRecording);
 
   // Create Oscillators
   bass = new p5.Oscillator(0.000001, "sawtooth");
-  bass.amp(0.5);
+  bass.amp(1);
   bass.start();
   
   osc2 = new p5.Oscillator(0.000001, "sawtooth");
   osc2.start();
+
+  recorder = new p5.SoundRecorder();
+  soundFile = new p5.SoundFile();
 }
 
 function draw() {
   background(0);
+
+  if (!hasRecordingStarted) {
+    return;
+  }
 
   // Accelerate inverse of period
   period = applyConstantAccelerationToInverse(period, -(1 / getTargetFrameRate()) / 120);
@@ -71,8 +82,31 @@ function draw() {
   }
 }
 
-function mousePressed() {
-  userStartAudio();
+function startRecording() {
+    // Start AudioContext
+    userStartAudio();
+  
+    if (state === 0) {
+      // Record to p5.SoundFile
+      recorder.record(soundFile);
+      hasRecordingStarted = true;
+      state++;
+    }
+    else if (state === 1) {
+      // Stop recording
+      recorder.stop();
+      state++;
+    }
+    else if (state === 2) {
+      // Save recording
+      save(soundFile, 'sounds.wav');
+      state++;
+    }
+    else if (state === 3) {
+      // Stop oscillators
+      bass.stop();
+      osc2.stop();
+    }
 }
 
 /*
