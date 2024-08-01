@@ -10,7 +10,8 @@
 
 /*
 - spring / bouncing ball that free-falls at end
-- 
+- keyboard controls!
+- fast subdivisions (1/30th of a second) but grouped rhythms
 
 
 CLASS IDEAS
