@@ -26,9 +26,6 @@ CLASS IDEAS
 // TODO: accelerate towards the octave!
 
 
-let canvas;
-let capture;
-
 let bassFreq = 0;
 let x = 0;
 let period = 30; // measured in frames
@@ -36,22 +33,10 @@ let bass, osc2;
 
 let i = 0;
 
-function preload() {
-  capture = new CCapture({
-    format: "webm",
-    name: "frames",
-    frameRate: 60,
-    verbose: true
-  })
-}
-
 function setup() {
-  frameRate(60);
-
   getAudioContext().suspend();
-
-  canvas = createCanvas(1000, 500);
-  canvas.id("canvas");
+  createCanvas(1000, 500);
+  frameRate(60);
 
   // Create Oscillators
   bass = new p5.Oscillator(0.000001, "sawtooth");
@@ -63,23 +48,11 @@ function setup() {
 }
 
 function draw() {
-  // if (frameCount === 1) {
-  //   capture.start();
-  // }
-  
-  // if (frameCount === 200) {
-  //   print("done");
-  //   noLoop();
-  //   capture.stop();
-  //   capture.save();
-  //   return;
-  // }
-
   background(0);
 
   // Accelerate inverse of period
   period = applyConstantAccelerationToInverse(period, -(1 / getTargetFrameRate()) / 120);
-  print("i: ", i, "period: ", round(period), period);
+  // print("i: ", i, "period: ", round(period), period);
   if (i == round(period) || i == round(period) + 1) {    
     // Randomize pitch
     bassFreq = roundToNearestMultiple(random(40, 140), 1);
@@ -88,7 +61,7 @@ function draw() {
     // Perlin doubling ratio
     let doublingRatio = map(noise(x), 0, 1, 1, 4);
     let freq2 = double(bass, bassFreq, doublingRatio, osc2);
-    print("bassFreq: ", bassFreq, "\t\t  freq2: ", freq2);
+    // print("bassFreq: ", bassFreq, "\t\t  freq2: ", freq2);
     
     x += 0.01;
     i = 0;
@@ -98,7 +71,6 @@ function draw() {
 }
 
 function mousePressed() {
-  console.log("mouse was pressed");
   userStartAudio();
 }
 
