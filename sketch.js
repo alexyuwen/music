@@ -12,6 +12,8 @@
 - spring / bouncing ball that free-falls at end
 - keyboard controls!
 - fast subdivisions (1/30th of a second) but grouped rhythms
+- Ornaments
+- my neume piece?
 
 
 CLASS IDEAS
@@ -36,6 +38,16 @@ let soundFile;
 let i = 0;
 let state = 0;
 let hasRecordingStarted = false;
+
+/*
+
+
+
+MAIN FUNCTIONS
+
+
+
+*/
 
 function setup() {
   getAudioContext().suspend();
@@ -82,6 +94,16 @@ function draw() {
   }
 }
 
+/*
+
+
+
+HELPER FUNCTIONS
+
+
+
+*/
+
 function startRecording() {
     // Start AudioContext
     userStartAudio();
@@ -110,7 +132,13 @@ function startRecording() {
 }
 
 /*
-HELPER FUNCTIONS
+
+
+
+MATH FUNCTIONS
+
+
+
 */
 
 function roundToNearestMultiple(num, base) {
