@@ -36,6 +36,15 @@ let bass, osc2;
 
 let i = 0;
 
+function preload() {
+  capture = new CCapture({
+    format: "webm",
+    name: "frames",
+    frameRate: 60,
+    verbose: true
+  })
+}
+
 function setup() {
   frameRate(60);
 
@@ -54,6 +63,18 @@ function setup() {
 }
 
 function draw() {
+  // if (frameCount === 1) {
+  //   capture.start();
+  // }
+  
+  // if (frameCount === 200) {
+  //   print("done");
+  //   noLoop();
+  //   capture.stop();
+  //   capture.save();
+  //   return;
+  // }
+
   background(0);
 
   // Accelerate inverse of period
