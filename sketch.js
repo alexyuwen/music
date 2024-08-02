@@ -6,6 +6,7 @@
 - Try simultaneous pitches
   - Occasional link-ups 
 - Gradually expanding pitch range -- start with narrow range!
+- alternate between Perlin doublingRatio and perfect octave doubling
 */
 
 /*
@@ -13,8 +14,6 @@
 - keyboard controls!
 - fast subdivisions (1/30th of a second) but grouped rhythms
 - Ornaments
-- my neume piece?
-- put parameters on screen for easy access/remembering and to spark GUI ideas
 
 CLASS IDEAS
 - stopwatch
@@ -33,12 +32,20 @@ PARAMETERS TO PLAY WITH
 
 METHODS
 - almostOctave() returns boolean
+
+
+
+
+
+
+BIG PICTURE
+- my neume piece?
+- put parameters on screen for easy access/remembering and to spark GUI ideas
+- add sample pieces to alexyuwen.com
+  - consider "Projects" section with tabs, just like "About" section
+- add second of silence at beginning and end of recording
 */
 
-// TODO: alternate between Perlin doublingRatio and perfect octave doubling
-
-// TODO: try accelerating parameter such as speed
-// TODO: accelerate towards the octave!
 
 /*
 
@@ -98,11 +105,14 @@ function draw() {
   }
 
   // Accelerate inverse of period
-  period = applyConstantAccelerationToInverse(period, (1 / getTargetFrameRate()) / 60);
+  if (period < 5.8) {
+    period = applyConstantAccelerationToInverse(period, (1 / getTargetFrameRate()) / 60);
+  }
   // print("i: ", i, "period: ", round(period), period);
   if (i == round(period) || i == round(period) + 1) {
+    print(period);
     // Randomize pitch
-    bassFreq = roundToNearestMultiple(random(50, 150), 4);
+    bassFreq = roundToNearestMultiple(random(60, 100), 3);
     if (random() > 0.05) {
       bass.amp(1);
       bass.freq(bassFreq);
@@ -128,6 +138,13 @@ function draw() {
   } else {
     i += 1;
   }
+  // TODO
+  // IDEAS
+  /*
+  - Repeat section, from beginning to 5.8 fps
+  - Set starting frequency of Perlin sequence
+    - 
+  */
 }
 
 /*
