@@ -57,7 +57,7 @@ GLOBAL VARIABLES
 
 */
 
-let canvas;
+// AUDIO
 let bassFreq = 0;
 let x = 0;
 let period = 1.5; // measured in frames
@@ -67,6 +67,18 @@ let soundFile;
 let i = 0; // almost like "framesSinceLastNote" but logic would need to be cleaned up
 let state = 0;
 let hasRecordingStarted = false;
+let audioStartTime;
+
+// ANIMATION
+let canvas;
+let mover;
+let G = 0.5;
+let gravity;
+let surfaceY;
+let friction;
+
+let bounceTime = 10000;
+let surfaceRemoved = false;
 
 /*
 
@@ -80,7 +92,7 @@ MAIN FUNCTIONS
 
 function setup() {
   getAudioContext().suspend();
-  canvas = createCanvas(1000, 500);
+  canvas = createCanvas(windowWidth, windowHeight);
   frameRate(60);
   canvas.mousePressed(startRecording);
 
@@ -95,6 +107,11 @@ function setup() {
 
   recorder = new p5.SoundRecorder();
   soundFile = new p5.SoundFile();
+
+  // ANIMATION
+  surfaceY = (5 / 6) * windowHeight;
+  mover = new Mover(0.5 * windowWidth, -0.15 * windowHeight);
+  gravity = createVector(0, G);
 }
 
 function draw() {
@@ -104,46 +121,54 @@ function draw() {
     return;
   }
 
-  if (period < 5.2) {
-    period += 0.004 * (5.2 - period);
-  }
-  print(period);
+  if (!surfaceRemoved) {
+    print(period);
+    if (period < 5.8) {
+      let periodDelta = 0.005 * (5.8 - period);
+      if (period > 5) {
+        periodDelta *= (5.8 - period);
+      }
 
-  if (i == round(period) || i == round(period) + 1) { // if period were decreasing, then also check if i == round(period) + 1
-    // Randomize pitch
-    bassFreq = roundToNearestMultiple(random(66, 100), 2);
-    if (random() > 0.05) {
-      bass.amp(1);
-      bass.freq(bassFreq);
-    } else {
-      if (random() > 1) {
-        bass.amp(0);
-      }
+      period += periodDelta;
     }
-    
-    if (random() > 0.0) {
-      osc2.amp(0.2);
-      let doublingRatio = map(noise(x), 0, 1, 1, 4);
-      let freq2 = double(bass, bassFreq, doublingRatio, osc2);
-      // print("bassFreq: ", bassFreq, "\t\t  freq2: ", freq2);
-    } else {
+  
+    if (i == round(period) || i == round(period) + 1) { // if period were decreasing, then also check if i == round(period) + 1
+      // Randomize pitch
+      bassFreq = roundToNearestMultiple(random(66, 100), 2);
+      if (random() > 0.05) {
+        bass.amp(1);
+        bass.freq(bassFreq);
+      } else {
+        if (random() > 1) {
+          bass.amp(0);
+        }
+      }
+      
       if (random() > 0.0) {
-        osc2.amp(0);
+        osc2.amp(0.2);
+        let doublingRatio = map(noise(x), 0, 1, 1.2, 3.6);
+         map(noise(x), 0, 1, 1.5, 3.5);
+        double(bass, bassFreq, doublingRatio, osc2);
+      } else {
+        if (random() > 0.0) {
+          osc2.amp(0);
+        }
       }
+      
+      x += 0.006;
+      i = 0;
+    } else {
+      i += 1;
     }
-    
-    x += 0.005;
-    i = 0;
   } else {
-    i += 1;
+    bass.stop();
+    osc2.stop();
   }
-  // TODO
-  // IDEAS
-  /*
-  - Repeat section, from beginning to 5.8 fps
-  - Set starting frequency of Perlin sequence
-    - 
-  */
+
+  // ANIMATION
+  mover.applyGravity();
+  mover.update();
+  mover.show();
 }
 
 /*
@@ -205,6 +230,8 @@ function startRecording() {
   userStartAudio();
 
   if (state === 0) {
+    audioStartTime = millis();
+
     // Record to p5.SoundFile
     recorder.record(soundFile);
     hasRecordingStarted = true;
