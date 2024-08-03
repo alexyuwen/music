@@ -60,11 +60,11 @@ GLOBAL VARIABLES
 let canvas;
 let bassFreq = 0;
 let x = 0;
-let period = 2; // measured in frames
+let period = 1.5; // measured in frames
 let bass, osc2;
 let recorder;
 let soundFile;
-let i = 0;
+let i = 0; // almost like "framesSinceLastNote" but logic would need to be cleaned up
 let state = 0;
 let hasRecordingStarted = false;
 
@@ -104,15 +104,14 @@ function draw() {
     return;
   }
 
-  // Accelerate inverse of period
-  if (period < 5.8) {
-    period = applyConstantAccelerationToInverse(period, (1 / getTargetFrameRate()) / 60);
+  if (period < 5.2) {
+    period += 0.004 * (5.2 - period);
   }
-  // print("i: ", i, "period: ", round(period), period);
-  if (i == round(period) || i == round(period) + 1) {
-    print(period);
+  print(period);
+
+  if (i == round(period) || i == round(period) + 1) { // if period were decreasing, then also check if i == round(period) + 1
     // Randomize pitch
-    bassFreq = roundToNearestMultiple(random(60, 100), 3);
+    bassFreq = roundToNearestMultiple(random(66, 100), 2);
     if (random() > 0.05) {
       bass.amp(1);
       bass.freq(bassFreq);
@@ -122,13 +121,13 @@ function draw() {
       }
     }
     
-    if (random() > 0.1) {
-      osc2.amp(0.3);
+    if (random() > 0.0) {
+      osc2.amp(0.2);
       let doublingRatio = map(noise(x), 0, 1, 1, 4);
       let freq2 = double(bass, bassFreq, doublingRatio, osc2);
       // print("bassFreq: ", bassFreq, "\t\t  freq2: ", freq2);
     } else {
-      if (random() > 0.2) {
+      if (random() > 0.0) {
         osc2.amp(0);
       }
     }
